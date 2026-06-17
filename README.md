@@ -52,7 +52,7 @@ pip install google-genai google-auth requests
 
 ## 📜 Script Usage
 
-### Tool 1: Model Armor Batch Inspection (`model-armor-batch-inspection.py`)
+### Tool 1: Model Armor Batch Inspection (`Model-Armor-Batch-Inspection.py`)
 
 This script interacts directly with the Google Cloud Model Armor `sanitizeUserPrompt` REST API. It evaluates inputs against predefined security templates to check for CSAM, Malicious URIs, RAI violations, PI/Jailbreaks, and Sensitive Data Protection (SDP) triggers.
 
@@ -67,7 +67,7 @@ Before running, open `model-armor-batch-inspection.py` and update the following 
 **Execution:**
 
 ```bash
-python model-armor-batch-inspection.py
+python Model-Armor-Batch-Inspection.py
 
 ```
 

@@ -41,7 +41,7 @@ The time-series line chart tracking threat trends requires a custom user-defined
 ## 🚀 Deployment Steps
 
 ### Step 1: Import the Dashboard Configuration
-1. Locate the file named `Model Armor Custom Dashboard.json` in this repository.
+1. Locate the file named `Model_Armor_Custom_Dashboard.json` in this repository.
 2. In the Google Cloud Console, navigate to **Monitoring** > **Dashboards**.
 3. Click the **Sample Library / Import** button at the top of the pane.
 4. Click **Import**, upload the `Model Armor Custom Dashboard.json` file, and confirm.

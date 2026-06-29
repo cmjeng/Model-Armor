@@ -1,0 +1,164 @@
+{
+  "displayName": "Model Armor Custom Dashboard",
+  "dashboardFilters": [],
+  "description": "",
+  "labels": {},
+  "mosaicLayout": {
+    "columns": 48,
+    "tiles": [
+      {
+        "height": 13,
+        "width": 20,
+        "widget": {
+          "text": {
+            "content": "## 🛠️ Model Armor Resources\n---\n*   🛡️ **[Model Armor Templates](https://console.cloud.google.com/security/modelarmor/templates)**\n*   📝 **[Model Armor Raw Logs](https://console.cloud.google.com/logs/query;query=jsonPayload.%40type%3D%22type.googleapis.com%2Fgoogle.cloud.modelarmor.logging.v1.SanitizeOperationLogEntry%22)**\n*   🔍 **[SDP Inspection Templates](https://console.cloud.google.com/security/sensitive-data-protection/landing/configuration/templates/inspect)**\n*   🎭 **[SDP De-identification Templates](https://console.cloud.google.com/security/sensitive-data-protection/landing/configuration/templates/deidentify)**\n---",
+            "format": "MARKDOWN",
+            "style": {
+              "backgroundColor": "#FFFFFF",
+              "fontSize": "FS_LARGE",
+              "horizontalAlignment": "H_LEFT",
+              "padding": "P_EXTRA_SMALL",
+              "pointerLocation": "POINTER_LOCATION_UNSPECIFIED",
+              "textColor": "#212121",
+              "verticalAlignment": "V_TOP"
+            }
+          }
+        }
+      },
+      {
+        "xPos": 20,
+        "height": 13,
+        "width": 28,
+        "widget": {
+          "title": "Alert Trend",
+          "xyChart": {
+            "chartOptions": {
+              "displayHorizontal": false,
+              "mode": "COLOR"
+            },
+            "dataSets": [
+              {
+                "minAlignmentPeriod": "60s",
+                "plotType": "LINE",
+                "targetAxis": "Y1",
+                "timeSeriesQuery": {
+                  "timeSeriesFilter": {
+                    "aggregation": {
+                      "alignmentPeriod": "60s",
+                      "crossSeriesReducer": "REDUCE_SUM",
+                      "groupByFields": [],
+                      "perSeriesAligner": "ALIGN_DELTA"
+                    },
+                    "filter": "metric.type=\"logging.googleapis.com/user/model_armor_blocked_count\""
+                  }
+                }
+              }
+            ],
+            "thresholds": [],
+            "yAxis": {
+              "scale": "LINEAR"
+            }
+          }
+        }
+      },
+      {
+        "yPos": 13,
+        "height": 9,
+        "width": 9,
+        "widget": {
+          "title": "Model Armor Validation Counts",
+          "scorecard": {
+            "sparkChartView": {
+              "sparkChartType": "SPARK_LINE"
+            },
+            "thresholds": [],
+            "timeSeriesQuery": {
+              "outputFullDuration": true,
+              "timeSeriesFilter": {
+                "aggregation": {
+                  "alignmentPeriod": "60s",
+                  "crossSeriesReducer": "REDUCE_SUM",
+                  "groupByFields": [],
+                  "perSeriesAligner": "ALIGN_DELTA"
+                },
+                "filter": "metric.type=\"modelarmor.googleapis.com/template/request_count\" resource.type=\"modelarmor.googleapis.com/Template\""
+              }
+            }
+          }
+        }
+      },
+      {
+        "yPos": 13,
+        "xPos": 9,
+        "height": 9,
+        "width": 8,
+        "widget": {
+          "title": "Model Armor Matched Counts",
+          "scorecard": {
+            "sparkChartView": {
+              "sparkChartType": "SPARK_LINE"
+            },
+            "thresholds": [],
+            "timeSeriesQuery": {
+              "outputFullDuration": true,
+              "timeSeriesFilter": {
+                "aggregation": {
+                  "alignmentPeriod": "60s",
+                  "crossSeriesReducer": "REDUCE_SUM",
+                  "groupByFields": [],
+                  "perSeriesAligner": "ALIGN_DELTA"
+                },
+                "filter": "metric.type=\"logging.googleapis.com/user/model_armor_blocked_count\""
+              }
+            }
+          }
+        }
+      },
+      {
+        "yPos": 13,
+        "xPos": 20,
+        "height": 12,
+        "width": 19,
+        "widget": {
+          "title": "Model Armor Filters",
+          "timeSeriesTable": {
+            "columnSettings": [],
+            "dataSets": [
+              {
+                "timeSeriesQuery": {
+                  "opsAnalyticsQuery": {
+                    "queryHandle": "SnYKcgGXTAFetFAVDug-bV3D8zxtlXYXGVRAz0l2XjvzTe6xT1AG_u25o26y7jMdafAgKVWSN4cZyLhBe_lPZq6qlDlfebb0bb11hEryfgqe_gxvbhiGBIuNfcvJkBfUFsO6np2_SMc0Tr1GsLcEdqguAfFfHhAA",
+                    "sql": "SELECT\n  f.filter_type AS `Filter Type`,\n  f.confidence_level AS `Confidence Level`,\n  COUNT(*) AS `Matched Count`\nFROM\n  -- 👈 [Please replace with your Project ID] Ensure the path is correct\n  `YOUR_GCP_PROJECT_ID.global._Default._AllLogs` AS log,\n  \n  -- 💡 Core Magic: Pack the status and confidence of all security items into an array within a single log entry and unnest it\n  UNNEST([\n    STRUCT(\n      'pi_and_jailbreak' AS filter_type, \n      JSON_VALUE(log.json_payload.sanitizationResult.filterResults.pi_and_jailbreak.piAndJailbreakFilterResult.matchState) AS match_state, \n      COALESCE(JSON_VALUE(log.json_payload.sanitizationResult.filterResults.pi_and_jailbreak.piAndJailbreakFilterResult.confidenceLevel), 'N/A') AS confidence_level\n    ),\n    STRUCT(\n      'rai:hate_speech', \n      JSON_VALUE(log.json_payload.sanitizationResult.filterResults.rai.raiFilterResult.raiFilterTypeResults.hate_speech.matchState), \n      COALESCE(JSON_VALUE(log.json_payload.sanitizationResult.filterResults.rai.raiFilterResult.raiFilterTypeResults.hate_speech.confidenceLevel), 'N/A')\n    ),\n    STRUCT(\n      'rai:harassment', \n      JSON_VALUE(log.json_payload.sanitizationResult.filterResults.rai.raiFilterResult.raiFilterTypeResults.harassment.matchState), \n      COALESCE(JSON_VALUE(log.json_payload.sanitizationResult.filterResults.rai.raiFilterResult.raiFilterTypeResults.harassment.confidenceLevel), 'N/A')\n    ),\n    STRUCT(\n      'rai:sexually_explicit', \n      JSON_VALUE(log.json_payload.sanitizationResult.filterResults.rai.raiFilterResult.raiFilterTypeResults.sexually_explicit.matchState), \n      COALESCE(JSON_VALUE(log.json_payload.sanitizationResult.filterResults.rai.raiFilterResult.raiFilterTypeResults.sexually_explicit.confidenceLevel), 'N/A')\n    ),\n    STRUCT(\n      'rai:dangerous', \n      JSON_VALUE(log.json_payload.sanitizationResult.filterResults.rai.raiFilterResult.raiFilterTypeResults.dangerous.matchState), \n      COALESCE(JSON_VALUE(log.json_payload.sanitizationResult.filterResults.rai.raiFilterResult.raiFilterTypeResults.dangerous.confidenceLevel), 'N/A')\n    ),\n    STRUCT(\n      'csam', \n      JSON_VALUE(log.json_payload.sanitizationResult.filterResults.csam.csamFilterFilterResult.matchState), \n      'N/A'\n    ),\n    STRUCT(\n      'malicious_uris', \n      JSON_VALUE(log.json_payload.sanitizationResult.filterResults.malicious_uris.maliciousUriFilterResult.matchState), \n      'N/A'\n    ),\n    STRUCT(\n      'sdp (Sensitive Data)', \n      JSON_VALUE(log.json_payload.sanitizationResult.filterResults.sdp.sdpFilterResult.inspectResult.matchState), \n      'N/A'\n    )\n  ]) AS f\nWHERE\n  log.json_payload.operationType IS NOT NULL\n  AND f.match_state = 'MATCH_FOUND'\nGROUP BY\n  1, 2\nORDER BY\n  `Filter Type` ASC,          -- 👈 1. Sort alphabetically by filter name (groups identical categories like 'rai:' prefixes together)\n  `Confidence Level` ASC      -- 👈 2. Within the same category, secondary-sort by confidence level (HIGH/MEDIUM/LOW)"
+                  }
+                }
+              }
+            ],
+            "metricVisualization": "NUMBER"
+          }
+        }
+      },
+      {
+        "yPos": 25,
+        "height": 32,
+        "width": 48,
+        "widget": {
+          "title": "Model Armor Validation (Max 1,000 records)",
+          "timeSeriesTable": {
+            "columnSettings": [],
+            "dataSets": [
+              {
+                "timeSeriesQuery": {
+                  "opsAnalyticsQuery": {
+                    "queryHandle": "SncKcwGXTAFePDQlizz_UgKvSm5Flmhq1xJ8_g3KORxb0fldH7fdroa-huSli9oFBWi3206r7VR_jaS0Ige5cEMyHFKGJ0EfqqmCOyYAsiUlcMFbfTKuDP-B6fQnfPUDfuU_oo0u4c0u3pI0FQJYOjiP7foYWYkQAA",
+                    "sql": "-- ========================================================\n-- ⚙️ MODEL ARMOR MONITORING TABLE - MAINTENANCE CONFIG\n-- ========================================================\n-- 1. Target Timezone: Modify 'Asia/Taipei' on line 11\n-- 2. Target Project ID: Modify 'YOUR_GCP_PROJECT_ID' on line 55\n-- ========================================================\n\nWITH config AS (\n  SELECT 'Asia/Taipei' AS tz   -- 👈 [1. Modify Timezone Here] (e.g., 'UTC', 'America/New_York')\n)\n\nSELECT\n  -- 1. Log Time: Apply the timezone setting from the config CTE using a scalar subquery\n  FORMAT_TIMESTAMP('%Y-%m-%d %H:%M:%S', log.timestamp, (SELECT tz FROM config)) AS log_time,\n  \n  -- 2. Sanitization Input: Automatically handles both plain text and Base64 decoded payloads\n  COALESCE(\n    JSON_VALUE(log.json_payload.sanitizationInput.text),\n    SAFE_CONVERT_BYTES_TO_STRING(\n      FROM_BASE64(JSON_VALUE(log.json_payload.sanitizationInput.byteItem.byteData))\n    ),\n    '[Unable to parse input content]'\n  ) AS sanitization_input,\n  \n  -- 3. Global Match Status: Indicates whether any filter rule caught a threat\n  JSON_VALUE(log.json_payload.sanitizationResult.filterMatchState) AS is_match,\n  \n  -- 4. Match Details: Dynamically extracts all matching threat categories (supports multi-filter matching)\n  CASE \n    WHEN JSON_VALUE(log.json_payload.sanitizationResult.filterMatchState) = 'NO_MATCH_FOUND' THEN 'None'\n    ELSE COALESCE(\n      -- 💡 Optimization: Use NULLIF and ARRAY_TO_STRING to string-join all matches while ignoring NULL values\n      NULLIF(\n        ARRAY_TO_STRING([\n          IF(JSON_VALUE(log.json_payload.sanitizationResult.filterResults.pi_and_jailbreak.piAndJailbreakFilterResult.matchState) = 'MATCH_FOUND',\n             CONCAT('pi_and_jailbreak (', COALESCE(JSON_VALUE(log.json_payload.sanitizationResult.filterResults.pi_and_jailbreak.piAndJailbreakFilterResult.confidenceLevel), 'UNKNOWN'), ')'), NULL),\n          IF(JSON_VALUE(log.json_payload.sanitizationResult.filterResults.rai.raiFilterResult.raiFilterTypeResults.hate_speech.matchState) = 'MATCH_FOUND',\n             CONCAT('rai:hate_speech (', COALESCE(JSON_VALUE(log.json_payload.sanitizationResult.filterResults.rai.raiFilterResult.raiFilterTypeResults.hate_speech.confidenceLevel), 'UNKNOWN'), ')'), NULL),\n          IF(JSON_VALUE(log.json_payload.sanitizationResult.filterResults.rai.raiFilterResult.raiFilterTypeResults.harassment.matchState) = 'MATCH_FOUND',\n             CONCAT('rai:harassment (', COALESCE(JSON_VALUE(log.json_payload.sanitizationResult.filterResults.rai.raiFilterResult.raiFilterTypeResults.harassment.confidenceLevel), 'UNKNOWN'), ')'), NULL),\n          IF(JSON_VALUE(log.json_payload.sanitizationResult.filterResults.rai.raiFilterResult.raiFilterTypeResults.sexually_explicit.matchState) = 'MATCH_FOUND',\n             CONCAT('rai:sexually_explicit (', COALESCE(JSON_VALUE(log.json_payload.sanitizationResult.filterResults.rai.raiFilterResult.raiFilterTypeResults.sexually_explicit.confidenceLevel), 'UNKNOWN'), ')'), NULL),\n          IF(JSON_VALUE(log.json_payload.sanitizationResult.filterResults.rai.raiFilterResult.raiFilterTypeResults.dangerous.matchState) = 'MATCH_FOUND',\n             CONCAT('rai:dangerous (', COALESCE(JSON_VALUE(log.json_payload.sanitizationResult.filterResults.rai.raiFilterResult.raiFilterTypeResults.dangerous.confidenceLevel), 'UNKNOWN'), ')'), NULL),\n          IF(JSON_VALUE(log.json_payload.sanitizationResult.filterResults.csam.csamFilterFilterResult.matchState) = 'MATCH_FOUND', 'csam', NULL),\n          IF(JSON_VALUE(log.json_payload.sanitizationResult.filterResults.malicious_uris.maliciousUriFilterResult.matchState) = 'MATCH_FOUND', 'malicious_uris', NULL),\n          IF(JSON_VALUE(log.json_payload.sanitizationResult.filterResults.sdp.sdpFilterResult.inspectResult.matchState) = 'MATCH_FOUND', 'sensitive_data_protection', NULL)\n        ], ', '), \n        '' -- Converts empty string to standard NULL if no specific filters listed above matched\n      ),\n      'other_matched' -- Fallback catch-all if an unmapped custom filter rule triggers a match\n    )\n  END AS match_details\n\nFROM\n  -- 👈 [2. Modify Project ID Here] Must point to a strict, single Log View data path\n  `YOUR_GCP_PROJECT_ID.global._Default._AllLogs` AS log\nWHERE\n  log.json_payload.operationType IS NOT NULL\nORDER BY\n  log.timestamp DESC\nLIMIT 1000"
+                  }
+                }
+              }
+            ],
+            "metricVisualization": "NUMBER"
+          }
+        }
+      }
+    ]
+  }
+}

@@ -55,7 +55,7 @@ Because Cloud Monitoring's analytical engine requires rigid data routing identif
 4. **Update Project ID**: Locate the `FROM` statement near the bottom of the queries and swap out the placeholder workspace ID for your actual Google Cloud Project ID:
     ```sql
     FROM
-      -- 👈 Replace 'nick-demo' with YOUR active Google Cloud Project ID
+      -- 👈 Replace 'YOUR_GCP_PROJECT_ID' with YOUR active Google Cloud Project ID
       `your-actual-project-id.global._Default._AllLogs` AS log
     ```
 5. **Update Timezone (For the Details Log Table)**: Inside the **"Model Armor Validation"** query, locate the Common Table Expression (CTE) configuration at the top and swap the timezone text anchor to your native tracking zone:
